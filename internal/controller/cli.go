@@ -3,7 +3,7 @@ package controller
 import (
 	"bufio"
 	"flatfile-orders-record/internal/db"
-	"flatfile-orders-record/internal/db/model"
+	"flatfile-orders-record/internal/model"
 	"fmt"
 	"log"
 	"os"

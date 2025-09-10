@@ -1,7 +1,7 @@
 package db
 
 import (
-	"flatfile-orders-record/internal/db/model"
+	"flatfile-orders-record/internal/model"
 	"fmt"
 	"io"
 	"os"
