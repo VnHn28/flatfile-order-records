@@ -1,6 +1,6 @@
 # Flat-File Order Records
 
-This project is a simple Go application for managing order records. It uses a binary flat-file (`orders.db`) as its database and provides a Command-Line Interface (CLI) for interaction.
+This project is a simple Go application for managing order records. It uses a binary flat-file (`orders.db`) as its database and provides both a Command-Line Interface (CLI) and a Graphical User Interface (GUI) for interaction.
 
 ## Features
 
@@ -8,7 +8,7 @@ This project is a simple Go application for managing order records. It uses a bi
 *   **Update**: Modify existing records by their `OrderID`.
 *   **Read All**: Display all records in the database.
 *   **Search**: Find specific records by their `OrderID`.
-*   **CLI Interface**: All operations are managed through an interactive command-line interface.
+*   **Dual Interface**: Can be run as a standard CLI application or as a Fyne-based GUI application.
 
 ## How to Run
 
@@ -28,6 +28,14 @@ To run the command-line interface:
 
 ```bash
 ./flatfile-order-records
+```
+
+### Run the GUI
+
+To run the graphical user interface, use the `-gui` flag:
+
+```bash
+./flatfile-order-records -gui
 ```
 
 ## Concurrency and Race Conditions
