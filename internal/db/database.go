@@ -54,34 +54,7 @@ func (d *Database) ReadAll() ([]*model.Order, error) {
 	d.mu.RLock()
 	defer d.mu.RUnlock()
 
-	file, err := d.ensureFileExists()
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-
-	var records []*model.Order
-	data := make([]byte, model.RecordSize)
-
-	for {
-		n, err := file.Read(data)
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			return nil, fmt.Errorf("failed to read from file: %w", err)
-		}
-		if n < model.RecordSize {
-			break
-		}
-
-		var order model.Order
-		if err := order.UnmarshalBinary(data); err != nil {
-			return nil, err
-		}
-		records = append(records, &order)
-	}
-	return records, nil
+	return d.scan(nil)
 }
 
 func (d *Database) UpdateById(orderID int64, newOrder model.Order) error {
@@ -137,13 +110,23 @@ func (d *Database) SearchById(orderID int64) ([]*model.Order, error) {
 	d.mu.RLock()
 	defer d.mu.RUnlock()
 
+	filter := func(order *model.Order) bool {
+		return order.OrderID == orderID
+	}
+
+	return d.scan(filter)
+}
+
+// Iterate through the database file and returns records that match the filter
+// If filter is nil then return all records
+func (d *Database) scan(filter func(*model.Order) bool) ([]*model.Order, error) {
 	file, err := d.ensureFileExists()
 	if err != nil {
 		return nil, err
 	}
 	defer file.Close()
 
-	var results []*model.Order
+	var records []*model.Order
 	data := make([]byte, model.RecordSize)
 
 	for {
@@ -160,12 +143,12 @@ func (d *Database) SearchById(orderID int64) ([]*model.Order, error) {
 
 		var order model.Order
 		if err := order.UnmarshalBinary(data); err != nil {
-			return nil, err
+			continue
 		}
 
-		if order.OrderID == orderID {
-			results = append(results, &order)
+		if filter == nil || filter(&order) {
+			records = append(records, &order)
 		}
 	}
-	return results, nil
+	return records, nil
 }
