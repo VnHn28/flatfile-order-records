@@ -67,46 +67,24 @@ func (c *CLI) printMenu() {
 }
 
 func (c *CLI) insertRecord() {
-	fmt.Print("Enter OrderID: ")
-	orderIDStr, err := c.reader.ReadString('\n')
-	if err != nil {
-		log.Println("Error reading OrderID:", err)
-		return
-	}
-	orderID, err := strconv.ParseInt(strings.TrimSpace(orderIDStr), 10, 64)
-	if err != nil {
-		fmt.Println("Invalid OrderID:", err)
+	orderID, ok := c.inputInt64("Enter OrderID: ")
+	if !ok {
 		return
 	}
 
-	fmt.Print("Enter Owner (max 32 chars): ")
-	ownerStr, err := c.reader.ReadString('\n')
-	if err != nil {
-		log.Println("Error reading Owner:", err)
+	ownerStr, ok := c.inputString("Enter Owner (max 32 chars): ")
+	if !ok {
 		return
 	}
-	ownerStr = strings.TrimSpace(ownerStr)
 	var owner [32]byte
 	copy(owner[:], ownerStr)
 
-	fmt.Print("Enter Amount: ")
-	amountStr, err := c.reader.ReadString('\n')
-	if err != nil {
-		log.Println("Error reading Amount:", err)
-		return
-	}
-	amount, err := strconv.ParseInt(strings.TrimSpace(amountStr), 10, 64)
-	if err != nil {
-		fmt.Println("Invalid Amount:", err)
+	amount, ok := c.inputInt64("Enter Amount: ")
+	if !ok {
 		return
 	}
 
-	order := model.Order{
-		OrderID: orderID,
-		Owner:   owner,
-		Amount:  amount,
-	}
-
+	order := model.Order{OrderID: orderID, Owner: owner, Amount: amount}
 	if err := c.database.Insert(order); err != nil {
 		log.Println("Error inserting record:", err)
 	} else {
@@ -120,59 +98,28 @@ func (c *CLI) readAllRecords() {
 		log.Println("Error reading records:", err)
 		return
 	}
-	if len(records) == 0 {
-		fmt.Println("No records found.")
-		return
-	}
-	for _, record := range records {
-		fmt.Printf("OrderID: %d, Owner: %s, Amount: %d\n",
-			record.OrderID,
-			strings.Trim(string(record.Owner[:]), "\x00"),
-			record.Amount)
-	}
+	c.displayRecords(records)
 }
 
 func (c *CLI) updateRecord() {
-	fmt.Print("Enter OrderID to update: ")
-	orderIDStr, err := c.reader.ReadString('\n')
-	if err != nil {
-		log.Println("Error reading OrderID:", err)
-		return
-	}
-	orderID, err := strconv.ParseInt(strings.TrimSpace(orderIDStr), 10, 64)
-	if err != nil {
-		fmt.Println("Invalid OrderID:", err)
+	orderID, ok := c.inputInt64("Enter OrderID to update: ")
+	if !ok {
 		return
 	}
 
-	fmt.Print("Enter new Owner (max 32 chars): ")
-	ownerStr, err := c.reader.ReadString('\n')
-	if err != nil {
-		log.Println("Error reading Owner:", err)
+	ownerStr, ok := c.inputString("Enter new Owner (max 32 chars): ")
+	if !ok {
 		return
 	}
-	ownerStr = strings.TrimSpace(ownerStr)
 	var owner [32]byte
 	copy(owner[:], ownerStr)
 
-	fmt.Print("Enter new Amount: ")
-	amountStr, err := c.reader.ReadString('\n')
-	if err != nil {
-		log.Println("Error reading Amount:", err)
-		return
-	}
-	amount, err := strconv.ParseInt(strings.TrimSpace(amountStr), 10, 64)
-	if err != nil {
-		fmt.Println("Invalid Amount:", err)
+	amount, ok := c.inputInt64("Enter new Amount: ")
+	if !ok {
 		return
 	}
 
-	newOrder := model.Order{
-		OrderID: orderID,
-		Owner:   owner,
-		Amount:  amount,
-	}
-
+	newOrder := model.Order{OrderID: orderID, Owner: owner, Amount: amount}
 	if err := c.database.UpdateById(orderID, newOrder); err != nil {
 		log.Println("Error updating record:", err)
 	} else {
@@ -181,15 +128,8 @@ func (c *CLI) updateRecord() {
 }
 
 func (c *CLI) searchRecords() {
-	fmt.Print("Enter OrderID to search for: ")
-	orderIDStr, err := c.reader.ReadString('\n')
-	if err != nil {
-		log.Println("Error reading OrderID:", err)
-		return
-	}
-	orderID, err := strconv.ParseInt(strings.TrimSpace(orderIDStr), 10, 64)
-	if err != nil {
-		fmt.Println("Invalid OrderID:", err)
+	orderID, ok := c.inputInt64("Enter OrderID to search for: ")
+	if !ok {
 		return
 	}
 
@@ -198,14 +138,45 @@ func (c *CLI) searchRecords() {
 		log.Println("Error searching for records:", err)
 		return
 	}
+	c.displayRecords(records)
+}
+
+func (c *CLI) inputInt64(prompt string) (int64, bool) {
+	fmt.Print(prompt)
+	str, err := c.reader.ReadString('\n')
+	if err != nil {
+		log.Println("Error reading input:", err)
+		return 0, false
+	}
+	val, err := strconv.ParseInt(strings.TrimSpace(str), 10, 64)
+	if err != nil {
+		fmt.Println("Invalid number format:", err)
+		return 0, false
+	}
+	return val, true
+}
+
+func (c *CLI) inputString(prompt string) (string, bool) {
+	fmt.Print(prompt)
+	str, err := c.reader.ReadString('\n')
+	if err != nil {
+		log.Println("Error reading input:", err)
+		return "", false
+	}
+	return strings.TrimSpace(str), true
+}
+
+func (c *CLI) displayRecords(records []*model.Order) {
 	if len(records) == 0 {
-		fmt.Println("No records found with that OrderID.")
+		fmt.Println("No records found.")
 		return
 	}
+	fmt.Println("--- Records ---")
 	for _, record := range records {
 		fmt.Printf("OrderID: %d, Owner: %s, Amount: %d\n",
 			record.OrderID,
 			strings.Trim(string(record.Owner[:]), "\x00"),
 			record.Amount)
 	}
+	fmt.Println("---------------")
 }
