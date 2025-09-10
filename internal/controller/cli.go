@@ -11,16 +11,14 @@ import (
 	"strings"
 )
 
-const dbFile = "orders.db"
-
 type CLI struct {
 	database *db.Database
 	reader   *bufio.Reader
 }
 
-func NewCLI() *CLI {
+func NewCLI(dbPath string) *CLI {
 	return &CLI{
-		database: db.NewDatabase(dbFile),
+		database: db.NewDatabase(dbPath),
 		reader:   bufio.NewReader(os.Stdin),
 	}
 }
