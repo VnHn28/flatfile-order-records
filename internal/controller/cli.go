@@ -2,8 +2,8 @@ package controller
 
 import (
 	"bufio"
-	"flatfile-orders-record/internal/db"
-	"flatfile-orders-record/internal/model"
+	"flatfile-order-records/internal/db"
+	"flatfile-order-records/internal/model"
 	"fmt"
 	"log"
 	"os"
@@ -24,7 +24,7 @@ func NewCLI(dbPath string) *CLI {
 }
 
 func (c *CLI) Run() {
-	fmt.Println("Orders Record Flat-File Database System")
+	fmt.Println("Order Records Flat-File Database System")
 	fmt.Println("---------------------------------------")
 
 	for {

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"flatfile-orders-record/internal/controller"
+	"flatfile-order-records/internal/controller"
 	"log"
 	"os"
 )
