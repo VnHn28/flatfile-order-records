@@ -169,12 +169,12 @@ func (c *CLI) displayRecords(records []*model.Order) {
 		fmt.Println("No records found.")
 		return
 	}
-	fmt.Println("--- Records ---")
+	fmt.Println("--------------- Records ---------------")
 	for _, record := range records {
 		fmt.Printf("OrderID: %d, Owner: %s, Amount: %d\n",
 			record.OrderID,
 			strings.Trim(string(record.Owner[:]), "\x00"),
 			record.Amount)
 	}
-	fmt.Println("---------------")
+	fmt.Println("---------------------------------------")
 }
